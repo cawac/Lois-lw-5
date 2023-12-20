@@ -57,5 +57,9 @@ class FuzzyEntityController:
         return predicates
 
     @staticmethod
-    def get_ancedent(consequent, predicate):
-        consequent
+    def calculate_ancedent(consequent, predicate):
+        
+        for i in consequent:
+            for j in predicate:
+                if j[0][1] != i[0]:
+                    continue

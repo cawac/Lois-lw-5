@@ -7,10 +7,9 @@
 # Нечеткая логика: алгебраические основы и приложения(Блюмин, Шуйкова)
 # Логические основы интеллектуальнвых систем. Практикум:учебно-метод. пособие(Голенков В.В., Ивашенко В.П.)
 
-from FuzzyLogic import FuzzyEntityController
+from FuzzyLogic import FuzzyEntityController, Equation
 
-
-menu = ("1- Вычесилить анцедень\n"
+menu = ("1- Вычесилить анцедент\n"
         "2- Добавить нечёткое множество\n"
         "3- Добавить предикат\n"        
         "exit- Выход\n")
@@ -35,6 +34,10 @@ if __name__ == "__main__":
                 choiced_predicate = input("Выберите предикат: ")
                 predicate = all_predicates[choiced_predicate]
 
+                for consequen in consequent:
+                    main_equation = Equation.MainEquation(consequen[0], predicate, consequen[1], composition=(max, min))
+                    system_of_equations = Equation.SystemOfEquations(main_equation)
+                    print(system_of_equations.calculate_answers())
                 # if len(matrix) != len(my_fuzzy_counter.consequent.values()):
                 #     raise ValueError("Длина правила и консеквента не совпадают.")
 
