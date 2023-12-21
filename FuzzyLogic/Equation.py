@@ -13,26 +13,42 @@ from .FuzzyInterval import FuzzyInterval
 from functools import reduce
 
 
-def equality(x, y, name):
-    if x < y:
+def equality_new(x, y, name):
+    if y == 0:
+        return {name: FuzzyInterval(0, 1 - x)}
+    elif y - x > 0:
         return None
-    elif x == y:
-        return {name: FuzzyInterval(x, 1)}
     else:
-        return {name: FuzzyInterval(y, y)}
+        return {name: FuzzyInterval(y - x + 1, y - x +1)}
 
-
-def less_equal(x, y, name):
-    if x < y:
-        return {name: FuzzyInterval(0, 1)}
-    elif x == y:
-        return {name: FuzzyInterval(0, 1)}
+def less_equal_new(x, y, name):
+    if y == 0:
+        return {name: FuzzyInterval(0, 1 - x)}
+    elif y - x > 0:
+        return None
     else:
-        return {name: FuzzyInterval(0, y)}
+        return {name: FuzzyInterval(0, y - x + 1)}
+
+# def equality(x, y, name):
+#     if x < y:
+#         return None
+#     elif x == y:
+#         return {name: FuzzyInterval(x, 1)}
+#     else:
+#         return {name: FuzzyInterval(y, y)}
+#
+#
+# def less_equal(x, y, name):
+#     if x < y:
+#         return {name: FuzzyInterval(0, 1)}
+#     elif x == y:
+#         return {name: FuzzyInterval(0, 1)}
+#     else:
+#         return {name: FuzzyInterval(0, y)}
 
 
-operation = {"==": equality,
-             "<=": less_equal}
+operation = {"==": equality_new,
+             "<=": less_equal_new}
 
 class MainEquation:
     def __init__(self, consequent_name, list_of_predicates, consequent_value):
@@ -132,8 +148,4 @@ class SystemOfEquations:
                     answers.append(answer)
             if len(answers) == 1:
                 return answers[0]
-        for key, value in answers:
-            if key.startswith("answer"):
-
-
         return answers
