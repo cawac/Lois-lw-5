@@ -26,7 +26,7 @@ def less_equal(x, y, name):
     if x < y:
         return {name: FuzzyInterval(0, 1)}
     elif x == y:
-        return {name: FuzzyInterval(x, 1)}
+        return {name: FuzzyInterval(0, 1)}
     else:
         return {name: FuzzyInterval(0, y)}
 
@@ -77,6 +77,10 @@ class SystemOfEquations:
         self.list_of_equations.append(equation)
         self.keys.update(equation.keys)
 
+    def add_system(self, system):
+        self.list_of_equations.append(system)
+        self.keys.update(system.keys)
+
     def initialize(self, main_equation):
         for key in main_equation.keys:
             self.keys.add(key)
@@ -93,11 +97,22 @@ class SystemOfEquations:
                 print("Невозможная операция")
 
     def calculate_answers(self):
-
+        answers = dict()
         if self.type_of_system == "and":
             answers = {key: list() for key in self.keys}
             for item in self.list_of_equations:
                 answer = item.calculate_answers()
+                if isinstance(answer, list):
+                    bAdded = True
+                    index = 1
+                    while bAdded:
+                        key = "answer" + str(index)
+                        if key not in answers:
+                            answers[key] = answer
+                            bAdded = False
+                        else:
+                            index += 1
+                    continue
                 if answer is None:
                     return dict()
                 for key, value in answer.items():
@@ -105,11 +120,20 @@ class SystemOfEquations:
                         answers[key].append(value)
                     else:
                         answers[key] = list(value)
-            for key, answer in answers.items():
-                answers[key] = reduce(lambda a, b: a * b, answer)
-        # elif self.type_of_system == "or":
+            answers = {key: value for key, value in answers.items() if value}
+            for key in answers:
+                if not key.startswith('answer'):
+                    answers[key] = reduce(lambda a, b: a * b, answers[key])
+        elif self.type_of_system == "or":
+            answers = list()
+            for item in self.list_of_equations:
+                answer = item.calculate_answers()
+                if answer not in answers and answer:
+                    answers.append(answer)
+            if len(answers) == 1:
+                return answers[0]
+        for key, value in answers:
+            if key.startswith("answer"):
 
-        # if self.type_of_system == "or":
-        #     for key, answer in answers.items():
 
         return answers

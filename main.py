@@ -35,12 +35,14 @@ if __name__ == "__main__":
                 choiced_predicate = input("Выберите предикат: ")
                 predicate = all_predicates[choiced_predicate]
 
+                main_system_of_equations = Equation.SystemOfEquations("and")
                 for consequen in consequent:
                     main_equation = Equation.MainEquation(consequen[0], predicate, consequen[1])
                     system_of_equations = Equation.SystemOfEquations("or")
                     system_of_equations.initialize(main_equation)
-                    answers = system_of_equations.calculate_answers()
-                    print(answers)
+                    main_system_of_equations.add_system(system_of_equations)
+                answers = main_system_of_equations.calculate_answers()
+                print(answers)
                 # if len(matrix) != len(my_fuzzy_counter.consequent.values()):
                 #     raise ValueError("Длина правила и консеквента не совпадают.")
 
