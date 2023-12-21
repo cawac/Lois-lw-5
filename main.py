@@ -1,11 +1,12 @@
 # Лабораторная работа 5 по дисциплине ЛОИС
 # Выполнена студентами группы 021702 БГУИР
 # Свиридовой М. О., Платоновым А. В. и Войшнис М. А.
-# Вариант 6 - Реализация обратного нечёткого логического вывода на основе операции нечёткой композиции (max({min({xi}U{yi})|i}))
+# Вариант 8 - Реализация обратного нечёткого логического вывода на основе операции нечёткой композиции (max({max({0}U{xi+yi-1})|i}))
 # 20.12.2023
 # Использованные материалы:
 # Нечеткая логика: алгебраические основы и приложения(Блюмин, Шуйкова)
 # Логические основы интеллектуальнвых систем. Практикум:учебно-метод. пособие(Голенков В.В., Ивашенко В.П.)
+
 
 from FuzzyLogic import FuzzyEntityController, Equation
 
@@ -28,16 +29,18 @@ if __name__ == "__main__":
                 choiced_consequent = input("Выберите консеквент: ")
                 consequent = all_sets[choiced_consequent]
 
-                for predicate_name, predicate in enumerate(all_predicates):
+                for predicate_name, predicate in all_predicates.items():
                     print(predicate_name, ":", fuzzy_entity_controller.get_text_of_fuzzy_predicate(predicate))
 
                 choiced_predicate = input("Выберите предикат: ")
                 predicate = all_predicates[choiced_predicate]
 
                 for consequen in consequent:
-                    main_equation = Equation.MainEquation(consequen[0], predicate, consequen[1], composition=(max, min))
-                    system_of_equations = Equation.SystemOfEquations(main_equation)
-                    print(system_of_equations.calculate_answers())
+                    main_equation = Equation.MainEquation(consequen[0], predicate, consequen[1])
+                    system_of_equations = Equation.SystemOfEquations("or")
+                    system_of_equations.initialize(main_equation)
+                    answers = system_of_equations.calculate_answers()
+                    print(answers)
                 # if len(matrix) != len(my_fuzzy_counter.consequent.values()):
                 #     raise ValueError("Длина правила и консеквента не совпадают.")
 

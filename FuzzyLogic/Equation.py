@@ -1,3 +1,13 @@
+# Лабораторная работа 5 по дисциплине ЛОИС
+# Выполнена студентами группы 021702 БГУИР
+# Свиридовой М. О., Платоновым А. В. и Войшнис М. А.
+# Вариант 8 - Реализация обратного нечёткого логического вывода на основе операции нечёткой композиции (max({max({0}U{xi+yi-1})|i}))
+# 20.12.2023
+# Использованные материалы:
+# Нечеткая логика: алгебраические основы и приложения(Блюмин, Шуйкова)
+# Логические основы интеллектуальнвых систем. Практикум:учебно-метод. пособие(Голенков В.В., Ивашенко В.П.)
+
+
 from .FuzzyValue import FuzzyValue
 from .FuzzyInterval import FuzzyInterval
 from functools import reduce
@@ -5,7 +15,7 @@ from functools import reduce
 
 def equality(x, y, name):
     if x < y:
-        return {name: None}
+        return None
     elif x == y:
         return {name: FuzzyInterval(x, 1)}
     else:
@@ -24,20 +34,19 @@ def less_equal(x, y, name):
 operation = {"==": equality,
              "<=": less_equal}
 
-
 class MainEquation:
-    def __init__(self, consequent_name, list_of_predicates, consequent_value, composition=(max, min)):
-        self.upper_operation = composition[0]
-        self.lower_operation = composition[1]
+    def __init__(self, consequent_name, list_of_predicates, consequent_value):
         self.list_of_expressions = dict()
         self.consequent_name = consequent_name
         self.consequent_value = consequent_value
+        self.keys = set()
         for predicate in list_of_predicates:
             if predicate[0][1] != consequent_name:
                 continue
             if predicate[0][0] in self.list_of_expressions:
                 print("Повторяющийся предикат")
-            self.list_of_expressions[predicate[0][0]] = predicate[0][1]
+            self.keys.add(predicate[0][0])
+            self.list_of_expressions[predicate[0][0]] = predicate[1]
 
 
 class Equation:
@@ -46,44 +55,61 @@ class Equation:
         self.value_x = value_x
         self.value_y = value_y
         self.binary_operator = binary_operator
+        self.keys = set()
+        self.keys.add(x_name)
 
     def calculate_answers(self):
-        return self.binary_operator(self.value_x, self.value_y, self.x_name)
+        return self.binary_operator(self.value_x.value, self.value_y.value, self.x_name)
 
 
-class SystemOfEquations(set):
+class SystemOfEquations:
 
-    def __init__(self, type_of_system="or", list_of_systems=None):
-        super().__init__()
+    def __init__(self, type_of_system="and", list_of_systems=None):
+        self.list_of_equations = list()
         self.type_of_system = type_of_system
-        if list_of_systems is not None:
-            for system in list_of_systems:
-                self.add(system)
         self.keys = set()
+        if list_of_systems is not None:
+            for systems in list_of_systems:
+                self.list_of_equations.append(systems)
+                self.keys.update(systems.keys)
+
+    def add_equation(self, equation):
+        self.list_of_equations.append(equation)
+        self.keys.update(equation.keys)
 
     def initialize(self, main_equation):
-        if main_equation.upper_operation == max:
-            for key in main_equation.list_of_expressions.keys:
-                self.keys.add(key)
-                temp_system_of_equations = SystemOfEquations("and")
-                for x, value_x in main_equation.list_of_expressions.items():
-                    if key == x:
-                        temp_system_of_equations.add(
-                            Equation(x, value_x, main_equation.consequent_value, operation["=="]))
-                    else:
-                        temp_system_of_equations.add(
-                            Equation(x, value_x, main_equation.consequent_value, operation["<="]))
-                if temp_system_of_equations != len(self.keys):
-                    print("Невозможная операция")
-                self.add(temp_system_of_equations)
+        for key in main_equation.keys:
+            self.keys.add(key)
+            temp_system_of_equations = SystemOfEquations("and")
+            for x, value_x in main_equation.list_of_expressions.items():
+                if key == x:
+                    temp_system_of_equations.add_equation(
+                        Equation(x, value_x, main_equation.consequent_value, operation["=="]))
+                else:
+                    temp_system_of_equations.add_equation(
+                        Equation(x, value_x, main_equation.consequent_value, operation["<="]))
+            self.list_of_equations.append(temp_system_of_equations)
+            if len(self.list_of_equations) != len(self.keys):
+                print("Невозможная операция")
 
     def calculate_answers(self):
-        answers = {key: list() for key in self.keys}
-        for item in self:
-            calculated_answer = item.calculate_answers()
-            if calculated_answer.values()[0] is None:
-                return dict()
-            answers[calculated_answer.keys()[0]].append(calculated_answer.values()[0])
+
         if self.type_of_system == "and":
+            answers = {key: list() for key in self.keys}
+            for item in self.list_of_equations:
+                answer = item.calculate_answers()
+                if answer is None:
+                    return dict()
+                for key, value in answer.items():
+                    if key in answers:
+                        answers[key].append(value)
+                    else:
+                        answers[key] = list(value)
             for key, answer in answers.items():
-                answers[key] = reduce(lambda a, b: a + b, answer)
+                answers[key] = reduce(lambda a, b: a * b, answer)
+        # elif self.type_of_system == "or":
+
+        # if self.type_of_system == "or":
+        #     for key, answer in answers.items():
+
+        return answers
