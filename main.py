@@ -8,7 +8,7 @@
 # Логические основы интеллектуальнвых систем. Практикум:учебно-метод. пособие(Голенков В.В., Ивашенко В.П.)
 
 
-from FuzzyLogic import FuzzyEntityController, Equation
+from FuzzyLogic import Equation, FuzzyEntityController
 
 menu = ("1- Вычесилить анцедент\n"
         "2- Добавить нечёткое множество\n"
@@ -42,7 +42,7 @@ if __name__ == "__main__":
                     system_of_equations.initialize(main_equation)
                     main_system_of_equations.add_system(system_of_equations)
                 answers = main_system_of_equations.calculate_answers()
-                print(answers)
+                print("Решение: ", answers)
                 # if len(matrix) != len(my_fuzzy_counter.consequent.values()):
                 #     raise ValueError("Длина правила и консеквента не совпадают.")
 

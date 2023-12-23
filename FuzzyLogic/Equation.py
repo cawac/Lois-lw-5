@@ -13,42 +13,27 @@ from .FuzzyInterval import FuzzyInterval
 from functools import reduce
 
 
-def equality_new(x, y, name):
+def equality(x, y, name):
     if y == 0:
-        return {name: FuzzyInterval(0, 1 - x)}
-    elif y - x > 0:
+        return {name: FuzzyInterval(0.0, 1.0 - x)}
+    elif y > x:
         return None
     else:
-        return {name: FuzzyInterval(y - x + 1, y - x +1)}
+        return {name: FuzzyInterval(y - x + 1.0, y - x + 1.0)}
 
-def less_equal_new(x, y, name):
+
+def less_equal(x, y, name):
     if y == 0:
-        return {name: FuzzyInterval(0, 1 - x)}
-    elif y - x > 0:
-        return None
+        return {name: FuzzyInterval(0.0, 1.0 - x)}
+    elif y > x:
+        return {name: FuzzyInterval(0.0, y - x + 1.0)}
     else:
-        return {name: FuzzyInterval(0, y - x + 1)}
-
-# def equality(x, y, name):
-#     if x < y:
-#         return None
-#     elif x == y:
-#         return {name: FuzzyInterval(x, 1)}
-#     else:
-#         return {name: FuzzyInterval(y, y)}
-#
-#
-# def less_equal(x, y, name):
-#     if x < y:
-#         return {name: FuzzyInterval(0, 1)}
-#     elif x == y:
-#         return {name: FuzzyInterval(0, 1)}
-#     else:
-#         return {name: FuzzyInterval(0, y)}
+        return {name: FuzzyInterval(0.0, y - x + 1.0)}
 
 
-operation = {"==": equality_new,
-             "<=": less_equal_new}
+operation = {"==": equality,
+             "<=": less_equal}
+
 
 class MainEquation:
     def __init__(self, consequent_name, list_of_predicates, consequent_value):
@@ -77,9 +62,16 @@ class Equation:
     def calculate_answers(self):
         return self.binary_operator(self.value_x.value, self.value_y.value, self.x_name)
 
+    def __str__(self):
+        op = str()
+        if self.binary_operator == equality:
+            op = "=="
+        elif self.binary_operator == less_equal:
+            op = "<="
+        return f"max(0, {self.x_name} + {self.value_x} - 1) {op} {self.value_y}"
+
 
 class SystemOfEquations:
-
     def __init__(self, type_of_system="and", list_of_systems=None):
         self.list_of_equations = list()
         self.type_of_system = type_of_system
@@ -140,12 +132,24 @@ class SystemOfEquations:
             for key in answers:
                 if not key.startswith('answer'):
                     answers[key] = reduce(lambda a, b: a * b, answers[key])
+                    if answers[key] is None:
+                        return dict()
+            for key in answers:
+                if key.startswith('answer'):
+                    for answer in answers[key]:
+                        for inner_key in answer:
+                            if inner_key in answers:
+                                answer[inner_key] = answers[inner_key] * answer[inner_key]
+            if "answer1" in answers:
+                answers = {key: value for key, value in answers.items() if not key.startswith("answer")}
         elif self.type_of_system == "or":
             answers = list()
             for item in self.list_of_equations:
                 answer = item.calculate_answers()
                 if answer not in answers and answer:
                     answers.append(answer)
+            if not answers:
+                return None
             if len(answers) == 1:
                 return answers[0]
         return answers
