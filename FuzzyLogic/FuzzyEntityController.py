@@ -9,8 +9,11 @@
 
 
 import json
+
+from .FuzzyValue import FuzzyValue
 from .Predicate import Predicate
 from .FuzzySet import FuzzySet
+from .Equation import Equation, MainEquation, SystemOfEquations
 
 
 class FuzzyEntityController:
@@ -42,7 +45,7 @@ class FuzzyEntityController:
             for set_name, set_ in data.items():
                 new_set = FuzzySet()
                 for name, value in set_:
-                    new_set.add(name, value)
+                    new_set.add(name, FuzzyValue(value))
                 sets[set_name] = sorted(new_set)
         return sets
 
@@ -62,3 +65,13 @@ class FuzzyEntityController:
             for j in predicate:
                 if j[0][1] != i[0]:
                     continue
+
+    @staticmethod
+    def calculate_answer(consequent, predicate):
+        main_system_of_equations = SystemOfEquations("and")
+        for consequen in consequent:
+            main_equation = MainEquation(consequen[0], predicate, consequen[1])
+            system_of_equations = SystemOfEquations("or")
+            system_of_equations.initialize(main_equation)
+            main_system_of_equations.add_system(system_of_equations)
+        return main_system_of_equations.calculate_answers()

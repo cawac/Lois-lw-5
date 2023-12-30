@@ -8,18 +8,27 @@
 # Логические основы интеллектуальнвых систем. Практикум:учебно-метод. пособие(Голенков В.В., Ивашенко В.П.)
 
 
-# operations = {
-#     't_norm': lambda val1, val2: FuzzyValue(val1.value * val2.value),
-#     'implication': lambda val1, val2: FuzzyValue(1) if val1.value <= val2.value else FuzzyValue(val2.value / val1.value)
-# }
+from .functions import invalid_type_error
 
 
 class FuzzyValue:
-    def __init__(self, value):
-        self.value = max(0.0, min(1.0, value))
+    def __init__(self, value: float):
+        if isinstance(value, float):
+            self.value: float = max(0.0, min(1.0, round(value, 8)))
+        else:
+            invalid_type_error(self.__init__, value, float)
 
     def __str__(self):
         return str(self.value)
 
     def __lt__(self, other):
-        return self.value < other.value
+        if isinstance(other, FuzzyValue):
+            return self.value < other.value
+        else:
+            invalid_type_error(self.__lt__, other, FuzzyValue)
+
+    def __le__(self, other):
+        if isinstance(other, FuzzyValue):
+            return self.value <= other.value
+        else:
+            invalid_type_error(self.__le__, other, FuzzyValue)

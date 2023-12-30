@@ -8,14 +8,5 @@
 # Логические основы интеллектуальнвых систем. Практикум:учебно-метод. пособие(Голенков В.В., Ивашенко В.П.)
 
 
-from .FuzzySet import FuzzySet
-from .FuzzyValue import FuzzyValue
-
-
-class Predicate(FuzzySet):
-    def __init__(self, set1=None, set2=None, implication=None, predicate=None):
-        super().__init__()
-
-        if predicate:
-            for i, j in predicate:
-                self.add((i[0], i[1]), FuzzyValue(j))
+def invalid_type_error(location, invalid_value, expected_type):
+    print(f"Неправильный тип данных {type(invalid_value)} передан в {location}, ожидалось {expected_type}")

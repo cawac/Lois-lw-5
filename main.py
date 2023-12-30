@@ -8,15 +8,20 @@
 # Логические основы интеллектуальнвых систем. Практикум:учебно-метод. пособие(Голенков В.В., Ивашенко В.П.)
 
 
-from FuzzyLogic import Equation, FuzzyEntityController
+from FuzzyLogic import Tester, FuzzyEntityController
 
+
+
+fuzzy_entity_controller = FuzzyEntityController.FuzzyEntityController()
 menu = ("1- Вычесилить анцедент\n"
-        "2- Добавить нечёткое множество\n"
-        "3- Добавить предикат\n"        
+        # "2- Добавить нечёткое множество\n"
+        # "3- Добавить предикат\n"  
+        # "4- Тесты\n"
         "exit- Выход\n")
 
+
 if __name__ == "__main__":
-    fuzzy_entity_controller = FuzzyEntityController.FuzzyEntityController()
+    tester = Tester.Tester()
     all_sets = fuzzy_entity_controller.read_sets_from_file("sets.json")
     all_predicates = fuzzy_entity_controller.read_predicates_from_file("predicates.json")
     while True:
@@ -35,25 +40,20 @@ if __name__ == "__main__":
                 choiced_predicate = input("Выберите предикат: ")
                 predicate = all_predicates[choiced_predicate]
 
-                main_system_of_equations = Equation.SystemOfEquations("and")
-                for consequen in consequent:
-                    main_equation = Equation.MainEquation(consequen[0], predicate, consequen[1])
-                    system_of_equations = Equation.SystemOfEquations("or")
-                    system_of_equations.initialize(main_equation)
-                    main_system_of_equations.add_system(system_of_equations)
-                answers = main_system_of_equations.calculate_answers()
+                answers = fuzzy_entity_controller.calculate_answer(all_sets[choiced_consequent], all_predicates[choiced_predicate])
                 print("Решение: ", answers)
                 # if len(matrix) != len(my_fuzzy_counter.consequent.values()):
                 #     raise ValueError("Длина правила и консеквента не совпадают.")
 
             case "2":
-
                 input_string2 = input(
                     "Введите эталонный консеквент(числа из промежутка [0; 1]. Дробную часть отделять точкой, "
                     "новый элемент - пробелом. Пример: x1:0.1 x2:0.2):\n")
 
-            case "3":
-                fuzzy_entity_controller
+            # case "3":
+            #     fuzzy_entity_controller
+            # case "4":
+            #     tester.test_all(all_sets, all_predicates)
             case "exit":
                 break
             case _:

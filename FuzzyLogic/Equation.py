@@ -10,25 +10,24 @@
 
 from .FuzzyValue import FuzzyValue
 from .FuzzyInterval import FuzzyInterval
-from functools import reduce
+from .Answer import Answer
 
 
-def equality(x, y, name):
-    if y == 0:
-        return {name: FuzzyInterval(0.0, 1.0 - x)}
+def equality(x: float, y: float, name: str):
+    if y == 0.0:
+        return Answer({name: FuzzyInterval(FuzzyValue(0.0), FuzzyValue(1.0 - x))})
     elif y > x:
-        return None
+        return Answer()
     else:
-        return {name: FuzzyInterval(y - x + 1.0, y - x + 1.0)}
+        return Answer({name: FuzzyInterval(FuzzyValue(y - x + 1.0), FuzzyValue(y - x + 1.0))})
 
 
-def less_equal(x, y, name):
-    if y == 0:
-        return {name: FuzzyInterval(0.0, 1.0 - x)}
-    elif y > x:
-        return {name: FuzzyInterval(0.0, y - x + 1.0)}
-    else:
-        return {name: FuzzyInterval(0.0, y - x + 1.0)}
+def less_equal(x: float, y: float, name: str):
+    return Answer({name: FuzzyInterval(FuzzyValue(0.0), FuzzyValue(y - x + 1.0))})
+
+
+def greater_equal():
+    return
 
 
 operation = {"==": equality,
@@ -36,12 +35,14 @@ operation = {"==": equality,
 
 
 class MainEquation:
-    def __init__(self, consequent_name, list_of_predicates, consequent_value):
-        self.list_of_expressions = dict()
-        self.consequent_name = consequent_name
-        self.consequent_value = consequent_value
-        self.keys = set()
-        for predicate in list_of_predicates:
+    def __init__(self, consequent_name: str, predicates, consequent_value: FuzzyValue, composition = None):
+        self.list_of_expressions: dict = dict()
+        self.consequent_name: str = consequent_name
+        self.consequent_value: FuzzyValue = consequent_value
+        self.keys: set = set()
+        self.upper_operator: str = "max"
+        self.lower_operator: str = "min"
+        for predicate in predicates:
             if predicate[0][1] != consequent_name:
                 continue
             if predicate[0][0] in self.list_of_expressions:
@@ -49,14 +50,17 @@ class MainEquation:
             self.keys.add(predicate[0][0])
             self.list_of_expressions[predicate[0][0]] = predicate[1]
 
+    def __repr__(self):
+        return f"{self.consequent_name} = {self.upper_operator}{(str(f'{str(self.lower_operator)}({0}, {key}+{value}-1)') for key, value in self.list_of_expressions.items())}) = {self.consequent_value}"
+
 
 class Equation:
-    def __init__(self, x_name, value_x, value_y, binary_operator):
-        self.x_name = x_name
-        self.value_x = value_x
-        self.value_y = value_y
+    def __init__(self, x_name: str, value_x: FuzzyValue, value_y: FuzzyValue, binary_operator):
+        self.x_name: str = x_name
+        self.value_x: FuzzyValue = value_x
+        self.value_y: FuzzyValue = value_y
         self.binary_operator = binary_operator
-        self.keys = set()
+        self.keys: set = set()
         self.keys.add(x_name)
 
     def calculate_answers(self):
@@ -105,51 +109,11 @@ class SystemOfEquations:
                 print("Невозможная операция")
 
     def calculate_answers(self):
-        answers = dict()
-        if self.type_of_system == "and":
-            answers = {key: list() for key in self.keys}
-            for item in self.list_of_equations:
-                answer = item.calculate_answers()
-                if isinstance(answer, list):
-                    bAdded = True
-                    index = 1
-                    while bAdded:
-                        key = "answer" + str(index)
-                        if key not in answers:
-                            answers[key] = answer
-                            bAdded = False
-                        else:
-                            index += 1
-                    continue
-                if answer is None:
-                    return dict()
-                for key, value in answer.items():
-                    if key in answers:
-                        answers[key].append(value)
-                    else:
-                        answers[key] = list(value)
-            answers = {key: value for key, value in answers.items() if value}
-            for key in answers:
-                if not key.startswith('answer'):
-                    answers[key] = reduce(lambda a, b: a * b, answers[key])
-                    if answers[key] is None:
-                        return dict()
-            for key in answers:
-                if key.startswith('answer'):
-                    for answer in answers[key]:
-                        for inner_key in answer:
-                            if inner_key in answers:
-                                answer[inner_key] = answers[inner_key] * answer[inner_key]
-            if "answer1" in answers:
-                answers = {key: value for key, value in answers.items() if not key.startswith("answer")}
-        elif self.type_of_system == "or":
-            answers = list()
-            for item in self.list_of_equations:
-                answer = item.calculate_answers()
-                if answer not in answers and answer:
-                    answers.append(answer)
-            if not answers:
-                return None
-            if len(answers) == 1:
-                return answers[0]
+        answers = Answer(type_of_answer=self.type_of_system)
+        for item in self.list_of_equations:
+            answer = item.calculate_answers()
+            answers.add_answer(answer)
         return answers
+
+    def __repr__(self):
+        return f"{self.type_of_system} { tuple( str(equation) for equation in self.list_of_equations ) }"
