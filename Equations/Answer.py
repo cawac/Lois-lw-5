@@ -8,8 +8,8 @@
 # Логические основы интеллектуальнвых систем. Практикум:учебно-метод. пособие(Голенков В.В., Ивашенко В.П.)
 
 
-from .FuzzyInterval import FuzzyInterval
-from .functions import invalid_type_error
+from FuzzyLogic.FuzzyInterval import FuzzyInterval
+from FuzzyLogic.functions import invalid_type_error
 from itertools import permutations
 from functools import reduce
 
