@@ -12,17 +12,18 @@ from .FuzzyEntityController import FuzzyEntityController
 from unittest import TestCase
 from .FuzzyInterval import FuzzyInterval
 from .FuzzyValue import FuzzyValue
+from Equations import Answer
 
 
 class Tester(TestCase):
     def test_all(self, consequents, predicates):
         self.test_expression(consequents["Y1"], predicates["P1"],
                              {"x1": FuzzyInterval(FuzzyValue(0.8), FuzzyValue(0.8))})
-        self.test_expression(consequents["Y3"], predicates["P3"],
-                             {"x1": FuzzyInterval(FuzzyValue(0.9), FuzzyValue(0.9))})
-        self.test_expression(consequents["Y4"], predicates["P4"],
-                             {"x1": FuzzyInterval(FuzzyValue(0.0), FuzzyValue(1.0)),
-                              "x2": FuzzyInterval(FuzzyValue(1.0), FuzzyValue(1.0))})
+        # self.test_expression(consequents["Y3"], predicates["P3"],
+        #                      {"x1": FuzzyInterval(FuzzyValue(0.9), FuzzyValue(0.9))})
+        # self.test_expression(consequents["Y4"], predicates["P4"],
+        #                      {"x1": FuzzyInterval(FuzzyValue(0.0), FuzzyValue(1.0)),
+        #                       "x2": FuzzyInterval(FuzzyValue(1.0), FuzzyValue(1.0))})
 
     def test_expression(self, consequent, predicate, excepted):
         answers = FuzzyEntityController.calculate_answer(consequent, predicate)

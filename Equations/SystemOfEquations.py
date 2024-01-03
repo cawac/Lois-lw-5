@@ -3,14 +3,18 @@ from .Answer import Answer
 
 
 class SystemOfEquations:
-    def __init__(self, type_of_system="and", list_of_systems=None):
-        self.list_of_equations = list()
+    def __init__(self, type_of_system="and", list_of_systems: list = None):
+        self.list_of_equations: list = list()
         self.type_of_system = type_of_system
         self.keys = set()
-        if list_of_systems is not None:
-            for systems in list_of_systems:
-                self.list_of_equations.append(systems)
-                self.keys.update(systems.keys)
+        if list_of_systems is None:
+            return
+        if not isinstance(list_of_systems, list):
+            invalid_type_error(self.__init__, list_of_systems, list)
+            return
+        for system in list_of_systems:
+            self.list_of_equations.append(system)
+            self.keys.update(system.keys())
 
     def add_equation(self, equation):
         self.list_of_equations.append(equation)
@@ -21,10 +25,10 @@ class SystemOfEquations:
         self.keys.update(system.keys)
 
     def initialize(self, main_equation):
-        for key in main_equation.keys:
+        for key in main_equation.keys():
             self.keys.add(key)
             temp_system_of_equations = SystemOfEquations("and")
-            for x, value_x in main_equation.list_of_expressions.items():
+            for x, value_x in main_equation.items():
                 if key == x:
                     temp_system_of_equations.add_equation(
                         Equation(x, value_x, main_equation.consequent_value, operation["=="]))
