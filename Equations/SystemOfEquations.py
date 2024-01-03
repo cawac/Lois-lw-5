@@ -2,8 +2,6 @@ from .Equation import *
 from .Answer import Answer
 
 
-
-
 class SystemOfEquations:
     def __init__(self, type_of_system="and", list_of_systems=None):
         self.list_of_equations = list()

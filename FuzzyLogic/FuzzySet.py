@@ -13,11 +13,13 @@ from .functions import invalid_type_error
 
 
 class FuzzySet(set):
-    def add(self, element, fuzzy_value: FuzzyValue):
+    def add(self, element, fuzzy_value: FuzzyValue) -> None:
         for item in self:
             if item[0] == element:
                 return
         if isinstance(fuzzy_value, FuzzyValue):
             super().add((element, fuzzy_value))
+        elif isinstance(fuzzy_value, float):
+            super().add((element, FuzzyValue(fuzzy_value)))
         else:
             invalid_type_error(self.__init__, fuzzy_value, FuzzyValue)

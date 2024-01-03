@@ -8,42 +8,53 @@
 # Логические основы интеллектуальнвых систем. Практикум:учебно-метод. пособие(Голенков В.В., Ивашенко В.П.)
 
 
-from FuzzyLogic.FuzzyInterval import FuzzyInterval
 from FuzzyLogic.functions import invalid_type_error
-from itertools import permutations
-from functools import reduce
+
 
 class Answer(dict):
-    def __init__(self, intervals=None, solutions=None, type_of_answer=None):
+    def __init__(self, intervals: dict = None, solutions: list = None, type_of_answer: str = None):
         super().__init__()
         if solutions is None:
             solutions = list()
-            self.solutions = solutions
+            self.solutions: list = solutions
+        elif isinstance(solutions, list):
+            self.solutions: list = solutions
+        else:
+            invalid_type_error(self.__init__, solutions, list)
+
         if intervals is None:
             intervals = dict()
+            for key, value in intervals.items():
+                self[key] = value
+        elif isinstance(intervals, dict):
+            for key, value in intervals.items():
+                self[key] = value
+        else:
+            invalid_type_error(self.__init__, intervals, dict)
+
         if type_of_answer is None:
             type_of_answer = "and"
-        self.type_of_answer = type_of_answer
-        for key, value in intervals.items():
-            self[key] = value
-        self.have_solution = True
+        elif type_of_answer not in ("and", "or"):
+            invalid_type_error(self.__init__, type_of_answer, ("and", "or"))
+        self.type_of_answer: str = type_of_answer
+
+        self.have_solution: bool = True
 
     def add_answer(self, answer):
-        if isinstance(answer, Answer):
-            if not self.have_solution:
-                return
-            if self.type_of_answer == "or":
-                if answer.have_solution:
-                    self.add_solution(answer)
-            elif self.type_of_answer == "and":
-                if answer.is_empty() or not answer.have_solution:
-                    self.have_solution = False
-                elif answer.solutions:
-                    self.add_solution(answer)
-                elif answer:
-                    self.add_interval(answer)
+        if not isinstance(answer, Answer) or not self.have_solution:
+            return
+        if self.type_of_answer == "or":
+            if answer.have_solution:
+                self.add_solution(answer)
+        elif self.type_of_answer == "and":
+            if answer.is_empty() or not answer.have_solution:
+                self.have_solution = False
+            elif answer.solutions:
+                self.add_solution(answer)
+            elif answer:
+                self.add_interval(answer)
 
-    def add_interval(self, answer):
+    def add_interval(self, answer: dict):
         if not isinstance(answer, dict):
             invalid_type_error(self.add_interval, answer, dict)
         for variable, interval in answer.items():
@@ -66,7 +77,7 @@ class Answer(dict):
             if not bFinded:
                 self.solutions.append(solution)
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return not self and not self.solutions
 
     def reduce(self):
@@ -100,7 +111,7 @@ class Answer(dict):
 
     def clear(self) -> None:
         super().clear()
-        self.solutions = None
+        self.solutions = list()
 
     def combinations(self):
         result = Answer()

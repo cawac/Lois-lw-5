@@ -13,7 +13,7 @@ from .FuzzyValue import FuzzyValue
 
 
 class Predicate(FuzzySet):
-    def __init__(self, set1=None, set2=None, implication=None, predicate=None):
+    def __init__(self, predicate=None):
         super().__init__()
 
         if predicate:

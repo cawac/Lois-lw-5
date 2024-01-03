@@ -1,8 +1,9 @@
 from .Equation import *
+from FuzzyLogic import Predicate
 
 
 class MainEquation:
-    def __init__(self, consequent_name: str, predicates, consequent_value: FuzzyValue, composition=None):
+    def __init__(self, consequent_name: str, predicates: Predicate.Predicate, consequent_value: FuzzyValue, composition=None):
         self.list_of_expressions: dict = dict()
         self.consequent_name: str = consequent_name
         self.consequent_value: FuzzyValue = consequent_value
@@ -12,8 +13,6 @@ class MainEquation:
         for predicate in predicates:
             if predicate[0][1] != consequent_name:
                 continue
-            if predicate[0][0] in self.list_of_expressions:
-                print("Повторяющийся предикат")
             self.keys.add(predicate[0][0])
             self.list_of_expressions[predicate[0][0]] = predicate[1]
 
